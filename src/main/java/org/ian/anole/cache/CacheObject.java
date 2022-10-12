@@ -39,6 +39,9 @@ public class CacheObject<V> {
      * @return if true expired , if false not expired
      */
     public boolean isExpire() {
+        if (expire == -1) {
+            return false;
+        }
         return System.currentTimeMillis() - createTime > expire;
     }
 
