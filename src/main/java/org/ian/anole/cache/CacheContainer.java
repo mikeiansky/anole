@@ -2,8 +2,7 @@ package org.ian.anole.cache;
 
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * @author Ian
@@ -36,6 +35,20 @@ public class CacheContainer<K, V> {
     }
 
     /**
+     * create a cache container with cache size and expire time
+     *
+     * @param size      cache size
+     * @param expire    expire time
+     * @param predicate predicate that cache value is qualified
+     * @param <K>       cache key
+     * @param <V>       cache value
+     * @return cache container
+     */
+    public static <K, V> CacheContainer<K, V> of(int size, long expire, Predicate<V> predicate) {
+        return new CacheContainer<>(size, expire, predicate);
+    }
+
+    /**
      * create a cache container with default cache size and expire time
      *
      * @param <K> cache key
@@ -61,6 +74,8 @@ public class CacheContainer<K, V> {
      */
     private final LruCache<K, CacheObject<V>> cache;
 
+    private Predicate<V> predicate;
+
     /**
      * cache container
      *
@@ -68,8 +83,13 @@ public class CacheContainer<K, V> {
      * @param expire expire time
      */
     private CacheContainer(int size, long expire) {
+        this(size, expire, null);
+    }
+
+    private CacheContainer(int size, long expire, Predicate<V> predicate) {
         this.size = size;
         this.expire = expire;
+        this.predicate = predicate;
         cache = new LruCache<>(size);
     }
 
@@ -102,21 +122,37 @@ public class CacheContainer<K, V> {
     }
 
     /**
+     * real put cache value
+     *
+     * @param key cache key
+     * @param v   cache vakue
+     */
+    private void putCacheValue(K key, V v) {
+        if (v == null) {
+            return;
+        }
+        if (predicate != null && !predicate.test(v)) {
+            return;
+        }
+        cache.put(key, new CacheObject<>(v, expire));
+    }
+
+    /**
      * get cache value by cache key , and it will use feedback to create a new cache value if necessary
      *
      * @param key      cache key
      * @param feedback new cache object generate
      * @return cache object
      */
-    public V getCacheValue(K key, Supplier<V> feedback) {
+    public V getCacheValue(K key, Function<K, V> feedback) {
         CacheObject<V> cacheObject = cache.get(key);
         if (cacheObject != null) {
             V t = cacheObject.getValue();
             if (cacheObject.isExpire()) {
                 if (feedback != null) {
-                    V fresh = feedback.get();
+                    V fresh = feedback.apply(key);
                     if (fresh != null) {
-                        cache.put(key, new CacheObject<>(fresh, expire));
+                        putCacheValue(key, fresh);
                     } else {
                         cache.remove(key);
                     }
@@ -127,9 +163,44 @@ public class CacheContainer<K, V> {
             return t;
         } else {
             if (feedback != null) {
-                V fresh = feedback.get();
+                V fresh = feedback.apply(key);
                 if (fresh != null) {
-                    cache.put(key, new CacheObject<>(fresh, expire));
+                    putCacheValue(key, fresh);
+                    return fresh;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * refresh cache value by async way if expired
+     *
+     * @param key           cache key
+     * @param refreshAction async refresh
+     * @param feedback      create cache is miss
+     * @return cache value
+     */
+    public V getCacheValueAsync(K key, BiConsumer<K, BiConsumer<K, V>> refreshAction, Function<K, V> feedback) {
+        CacheObject<V> cacheObject = cache.get(key);
+        if (cacheObject != null) {
+            V t = cacheObject.getValue();
+            if (cacheObject.isExpire()) {
+                if (feedback != null) {
+                    // only expire
+                    refreshAction.accept(key, (k, v) -> {
+                        putCacheValue(key, v);
+                    });
+                } else {
+                    cache.remove(key);
+                }
+            }
+            return t;
+        } else {
+            if (feedback != null) {
+                V fresh = feedback.apply(key);
+                if (fresh != null) {
+                    putCacheValue(key, fresh);
                     return fresh;
                 }
             }
@@ -145,7 +216,7 @@ public class CacheContainer<K, V> {
      */
     public void addCacheValue(Collection<V> cacheValueList, Function<V, K> keyFunction) {
         for (V t : cacheValueList) {
-            cache.put(keyFunction.apply(t), new CacheObject<>(t, expire));
+            putCacheValue(keyFunction.apply(t), t);
         }
     }
 
@@ -156,7 +227,24 @@ public class CacheContainer<K, V> {
      * @param cacheValue cache value
      */
     public void addCacheValue(K key, V cacheValue) {
-        cache.put(key, new CacheObject<>(cacheValue, expire));
+        if (cacheValue == null) {
+            return;
+        }
+        putCacheValue(key, cacheValue);
+    }
+
+    /**
+     * add cache map
+     *
+     * @param cacheValueMap cache value map that need to be cached
+     */
+    public void addCacheValue(Map<K, V> cacheValueMap) {
+        if (cacheValueMap == null) {
+            return;
+        }
+        for (K key : cacheValueMap.keySet()) {
+            putCacheValue(key, cacheValueMap.get(key));
+        }
     }
 
     /**
@@ -166,6 +254,11 @@ public class CacheContainer<K, V> {
      */
     public void removeCacheValue(K key) {
         cache.remove(key);
+    }
+
+    public void asyncRefreshCacheValue(K key, Function<K, V> refreshFunction) {
+        V v = refreshFunction.apply(key);
+        addCacheValue(key, v);
     }
 
     /**

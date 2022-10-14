@@ -59,4 +59,72 @@ public class TypeSafe {
         return raw;
     }
 
+    /**
+     * parse string value to int with safe way
+     *
+     * @param raw string value that need to be parsed
+     * @return int value
+     */
+    public static int parseInt(String raw) {
+        if (StringUtils.isEmpty(raw)) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(raw);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * parse string value to float with safe way
+     *
+     * @param raw string value that need to be parsed
+     * @return float value
+     */
+    public static float parseFloat(String raw) {
+        if (StringUtils.isEmpty(raw)) {
+            return 0;
+        }
+        try {
+            return Float.parseFloat(raw);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * parse string value to long with safe way
+     *
+     * @param raw string value that need to be parsed
+     * @return long value
+     */
+    public static long parseLong(String raw) {
+        if (StringUtils.isEmpty(raw)) {
+            return 0;
+        }
+        try {
+            return Long.parseLong(raw);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * parse string value to double with safe way
+     *
+     * @param raw string value that need to be parsed
+     * @return double value
+     */
+    public static double parseDouble(String raw) {
+        if (StringUtils.isEmpty(raw)) {
+            return 0;
+        }
+        try {
+            return Double.parseDouble(raw);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
 }

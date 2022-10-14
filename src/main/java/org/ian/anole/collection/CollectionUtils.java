@@ -17,11 +17,8 @@ public class CollectionUtils {
      * @param collection collection that need to predicate is empty
      * @return true indicate collection is empty, false indicate collection is not empty
      */
-    public static <T> boolean isEmpty(Collection<T> collection) {
-        if (collection == null) {
-            return true;
-        }
-        return collection.isEmpty();
+    public static  boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
 
     /**
@@ -31,10 +28,7 @@ public class CollectionUtils {
      * @return true indicate collection is not empty, false indicate collection is empty
      */
     public static <T> boolean isNotEmpty(Collection<T> collection) {
-        if (collection == null) {
-            return false;
-        }
-        return !collection.isEmpty();
+        return collection != null && !collection.isEmpty();
     }
 
     /**
