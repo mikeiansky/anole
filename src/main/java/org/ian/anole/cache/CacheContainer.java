@@ -138,19 +138,19 @@ public class CacheContainer<K, V> {
     }
 
     /**
-     * get cache value by cache key , and it will use feedback to create a new cache value if necessary
+     * get cache value by cache key , and it will use fallback to create a new cache value if necessary
      *
      * @param key      cache key
-     * @param feedback new cache object generate
+     * @param fallback new cache object generate
      * @return cache object
      */
-    public V getCacheValue(K key, Function<K, V> feedback) {
+    public V getCacheValue(K key, Function<K, V> fallback) {
         CacheObject<V> cacheObject = cache.get(key);
         if (cacheObject != null) {
             V t = cacheObject.getValue();
             if (cacheObject.isExpire()) {
-                if (feedback != null) {
-                    V fresh = feedback.apply(key);
+                if (fallback != null) {
+                    V fresh = fallback.apply(key);
                     if (fresh != null) {
                         putCacheValue(key, fresh);
                     } else {
@@ -162,8 +162,8 @@ public class CacheContainer<K, V> {
             }
             return t;
         } else {
-            if (feedback != null) {
-                V fresh = feedback.apply(key);
+            if (fallback != null) {
+                V fresh = fallback.apply(key);
                 if (fresh != null) {
                     putCacheValue(key, fresh);
                     return fresh;
@@ -178,15 +178,15 @@ public class CacheContainer<K, V> {
      *
      * @param key           cache key
      * @param refreshAction async refresh
-     * @param feedback      create cache is miss
+     * @param fallback      create cache is miss
      * @return cache value
      */
-    public V getCacheValueAsync(K key, BiConsumer<K, BiConsumer<K, V>> refreshAction, Function<K, V> feedback) {
+    public V getCacheValueAsync(K key, BiConsumer<K, BiConsumer<K, V>> refreshAction, Function<K, V> fallback) {
         CacheObject<V> cacheObject = cache.get(key);
         if (cacheObject != null) {
             V t = cacheObject.getValue();
             if (cacheObject.isExpire()) {
-                if (feedback != null) {
+                if (fallback != null) {
                     // only expire
                     refreshAction.accept(key, (k, v) -> {
                         putCacheValue(key, v);
@@ -197,8 +197,8 @@ public class CacheContainer<K, V> {
             }
             return t;
         } else {
-            if (feedback != null) {
-                V fresh = feedback.apply(key);
+            if (fallback != null) {
+                V fresh = fallback.apply(key);
                 if (fresh != null) {
                     putCacheValue(key, fresh);
                     return fresh;
@@ -266,11 +266,16 @@ public class CacheContainer<K, V> {
      *
      * @param keyList     cache key list
      * @param keyFunction cache value generate function
-     * @param feedback    cache value create when miss if necessary
+     * @param fallback    cache value create when miss if necessary
      * @return cache value map
      */
-    public Map<K, V> getCacheValueMap(List<K> keyList, Function<V, K> keyFunction, Function<Set<K>, Map<K, V>> feedback) {
-        return getCacheValueMap(new HashSet<>(keyList), keyFunction, feedback);
+    public Map<K, V> getCacheValueMap(List<K> keyList, Function<V, K> keyFunction, Function<List<K>, Map<K, V>> fallback) {
+        return getCacheValueMap(new HashSet<>(keyList), keyFunction, ks -> {
+            if(fallback == null){
+                return null;
+            }
+            return fallback.apply(new ArrayList<>(ks));
+        });
     }
 
     /**
@@ -278,10 +283,10 @@ public class CacheContainer<K, V> {
      *
      * @param keySet      cache key set
      * @param keyFunction cache value generate function
-     * @param feedback    cache value create when miss if necessary
-     * @return caceh value map
+     * @param fallback    cache value create when miss if necessary
+     * @return cache value map
      */
-    public Map<K, V> getCacheValueMap(Set<K> keySet, Function<V, K> keyFunction, Function<Set<K>, Map<K, V>> feedback) {
+    public Map<K, V> getCacheValueMap(Set<K> keySet, Function<V, K> keyFunction, Function<Set<K>, Map<K, V>> fallback) {
         Map<K, V> cacheValueMap = new HashMap<>();
         Set<K> missKeyList = new HashSet<>();
         for (K k : keySet) {
@@ -292,11 +297,11 @@ public class CacheContainer<K, V> {
                 missKeyList.add(k);
             }
         }
-        if (missKeyList.size() > 0 && feedback != null) {
-            Map<K, V> feedbackValue = feedback.apply(missKeyList);
-            if (feedbackValue != null) {
-                addCacheValue(feedbackValue.values(), keyFunction);
-                cacheValueMap.putAll(feedbackValue);
+        if (missKeyList.size() > 0 && fallback != null) {
+            Map<K, V> fallbackValue = fallback.apply(missKeyList);
+            if (fallbackValue != null) {
+                addCacheValue(fallbackValue.values(), keyFunction);
+                cacheValueMap.putAll(fallbackValue);
             }
         }
         return cacheValueMap;
