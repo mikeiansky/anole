@@ -34,6 +34,13 @@ public class DateUtils {
         return sdf.format(calendar.getTime());
     }
 
+    public static String getDayOffsetStr(int dayOffset, String formatter) {
+        SimpleDateFormat sdf = new SimpleDateFormat(formatter);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, dayOffset);
+        return sdf.format(calendar.getTime());
+    }
+
     public static String convertToStr(String from, String fromFormat, String toFormat) {
         SimpleDateFormat fromSdf = new SimpleDateFormat(fromFormat);
         SimpleDateFormat toSdf = new SimpleDateFormat(toFormat);
