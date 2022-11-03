@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
  **/
 public class DateUtils {
 
+    public static String Y4 = "yyyy";
+
     public static String YMD = "yyyy-MM-dd";
 
     public static String YMDH = "yyyy-MM-dd-HH";
