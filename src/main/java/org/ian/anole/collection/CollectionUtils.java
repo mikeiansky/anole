@@ -51,6 +51,7 @@ public class CollectionUtils {
         for (T s : source) {
             R t = supplier.get();
             consumer.accept(s, t);
+            target.add(t);
         }
     }
 
