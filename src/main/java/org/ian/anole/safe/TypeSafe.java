@@ -1,5 +1,7 @@
 package org.ian.anole.safe;
 
+import java.util.function.Function;
+
 /**
  * @author Ian
  * @date 2022/10/11
@@ -125,6 +127,20 @@ public class TypeSafe {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    /**
+     * 获取安全数据
+     *
+     * @param s     原始数据
+     * @param apply 转换操作
+     * @return 结果数据
+     */
+    public static <S, T> T getValue(S s, Function<S, T> apply) {
+        if (s == null) {
+            return null;
+        }
+        return apply.apply(s);
     }
 
 }
