@@ -1,5 +1,6 @@
 package org.ian.anole.safe;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -137,6 +138,24 @@ public class TypeSafe {
      * @return 结果数据
      */
     public static <S, T> T getValue(S s, Function<S, T> apply) {
+        if (s == null) {
+            return null;
+        }
+        return apply.apply(s);
+    }
+
+    /**
+     * 获取安全的数据
+     * @param map 集合数据
+     * @param key
+     * @param apply
+     * @return
+     */
+    public static <K, S, T> T getValue(Map<K, S> map, K key, Function<S, T> apply) {
+        if (map == null) {
+            return null;
+        }
+        S s = map.get(key);
         if (s == null) {
             return null;
         }
