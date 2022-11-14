@@ -102,11 +102,11 @@ public class DateUtils {
                 case SECONDS:
                     return time / 1000;
                 case MINUTES:
-                    return Math.round(Math.ceil(Math.abs(time / (1000 * 60.0))));
+                    return Math.round(Math.floor(Math.abs(time / (1000 * 60.0))));
                 case HOURS:
-                    return Math.round(Math.ceil(Math.abs(time / (1000 * 60 * 60.0))));
+                    return Math.round(Math.floor(Math.abs(time / (1000 * 60 * 60.0))));
                 case DAYS:
-                    return Math.round(Math.ceil(Math.abs(time / (1000 * 60 * 60 * 24.0))));
+                    return Math.round(Math.floor(Math.abs(time / (1000 * 60 * 60 * 24.0))));
                 default:
                     return time;
             }
@@ -161,6 +161,13 @@ public class DateUtils {
         } catch (ParseException e) {
         }
         return 0;
+    }
+
+    public static void main(String[] args){
+        String t1 = "2022-11-14 15:30:33";
+        String t2 = "2022-11-14 15:31:33";
+        long offset = DateUtils.computeDistance(t1, t2, DateUtils.YMDHMS, TimeUnit.DAYS);
+        System.out.println("offset :::: " + offset);
     }
 
 }
