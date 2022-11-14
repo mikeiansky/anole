@@ -62,6 +62,23 @@ public class TypeSafe {
         return raw;
     }
 
+    public static boolean getValue(Boolean raw) {
+        if (raw == null) {
+            return false;
+        }
+        return raw;
+    }
+
+    public static boolean equal(Object o1, Object o2) {
+        if (o1 == null) {
+            return false;
+        }
+        if (o2 == null) {
+            return false;
+        }
+        return o1.equals(o2);
+    }
+
     /**
      * parse string value to int with safe way
      *
@@ -146,7 +163,8 @@ public class TypeSafe {
 
     /**
      * 获取安全的数据
-     * @param map 集合数据
+     *
+     * @param map   集合数据
      * @param key
      * @param apply
      * @return

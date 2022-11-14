@@ -1,8 +1,12 @@
 package org.ian.anole.collection;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author Ian
@@ -12,13 +16,58 @@ import java.util.function.Supplier;
 public class CollectionUtils {
 
     /**
+     * 获得去重后的集合列表
+     *
+     * @param list 集合数据
+     * @return 去重后的集合数据
+     */
+    public static <T> List<T> toDistinctList(List<T> list) {
+        return toDistinctList(list, Collections.emptyList());
+    }
+
+    /**
+     * 获得去重后的集合列表
+     *
+     * @param list     集合数据
+     * @param fallback 如果为空时的补偿处理
+     * @return 去重后的集合数据
+     */
+    public static <T> List<T> toDistinctList(List<T> list, List<T> fallback) {
+        if (list == null) {
+            return fallback;
+        }
+        return list.stream().distinct().collect(Collectors.toList());
+    }
+
+    /**
+     * 获取安全的集合类型
+     *
+     * @param list 原始集合数据
+     * @return 非空的集合数据
+     */
+    public static <T> List<T> toSafeList(List<T> list) {
+        if (list == null) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
+
+    /**
      * predicate collection is empty
      *
      * @param collection collection that need to predicate is empty
      * @return true indicate collection is empty, false indicate collection is not empty
      */
-    public static  boolean isEmpty(Collection<?> collection) {
+    public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Map map) {
+        return map == null || map.size() == 0;
+    }
+
+    public static boolean isNotEmpty(Map map) {
+        return map != null && map.size() > 0;
     }
 
     /**
