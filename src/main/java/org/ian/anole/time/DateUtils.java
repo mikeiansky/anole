@@ -125,4 +125,40 @@ public class DateUtils {
         return false;
     }
 
+    public static int compareASC(String time1, String time2, String formatter) {
+        SimpleDateFormat sdf = new SimpleDateFormat(formatter);
+        try {
+            Date d1 = sdf.parse(time1);
+            Date d2 = sdf.parse(time2);
+            long offset = d1.getTime() - d2.getTime();
+            if (offset == 0) {
+                return 0;
+            }
+            if (offset < 0) {
+                return -1;
+            }
+            return 1;
+        } catch (ParseException e) {
+        }
+        return 0;
+    }
+
+    public static int compareDESC(String time1, String time2, String formatter) {
+        SimpleDateFormat sdf = new SimpleDateFormat(formatter);
+        try {
+            Date d1 = sdf.parse(time1);
+            Date d2 = sdf.parse(time2);
+            long offset = d1.getTime() - d2.getTime();
+            if (offset == 0) {
+                return 0;
+            }
+            if (offset < 0) {
+                return 1;
+            }
+            return -1;
+        } catch (ParseException e) {
+        }
+        return 0;
+    }
+
 }
