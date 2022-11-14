@@ -74,6 +74,9 @@ public class CacheContainer<K, V> {
      */
     private final LruCache<K, CacheObject<V>> cache;
 
+    /**
+     * 缓存对象合法性验证
+     */
     private Predicate<V> predicate;
 
     /**
@@ -91,6 +94,13 @@ public class CacheContainer<K, V> {
         this.expire = expire;
         this.predicate = predicate;
         cache = new LruCache<>(size);
+    }
+
+    /**
+     * 清除缓存数据
+     */
+    public void clear() {
+        cache.clear();
     }
 
     /**
@@ -271,7 +281,7 @@ public class CacheContainer<K, V> {
      */
     public Map<K, V> getCacheValueMap(List<K> keyList, Function<V, K> keyFunction, Function<List<K>, Map<K, V>> fallback) {
         return getCacheValueMap(new HashSet<>(keyList), keyFunction, ks -> {
-            if(fallback == null){
+            if (fallback == null) {
                 return null;
             }
             return fallback.apply(new ArrayList<>(ks));
