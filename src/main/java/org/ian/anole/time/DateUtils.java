@@ -55,7 +55,7 @@ public class DateUtils {
                     break;
             }
         } catch (ParseException e) {
-
+            // ignore
         }
         SimpleDateFormat resSdf = new SimpleDateFormat(resultFormatter);
         return resSdf.format(calendar.getTime());
@@ -111,6 +111,7 @@ public class DateUtils {
                     return time;
             }
         } catch (ParseException e) {
+            // return default
             return 0;
         }
     }
@@ -122,7 +123,7 @@ public class DateUtils {
             Date d2 = sdf.parse(time2);
             return d1.before(d2);
         } catch (ParseException e) {
-
+            // ignore
         }
         return false;
     }
@@ -141,6 +142,7 @@ public class DateUtils {
             }
             return 1;
         } catch (ParseException e) {
+            // ignore
         }
         return 0;
     }
@@ -159,6 +161,7 @@ public class DateUtils {
             }
             return -1;
         } catch (ParseException e) {
+            // ignore
         }
         return 0;
     }
